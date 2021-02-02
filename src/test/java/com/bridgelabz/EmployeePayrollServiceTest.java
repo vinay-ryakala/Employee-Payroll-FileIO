@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -64,6 +66,23 @@ public class EmployeePayrollServiceTest
       EmployeePayrollService empPayrollService;
       empPayrollService = new EmployeePayrollService(Arrays.asList(arrayOfEmployees));
       empPayrollService.writeEmployeePayrollData(EmployeePayrollService.IOService.FILE_IO);
+      empPayrollService.printData(EmployeePayrollService.IOService.FILE_IO);
       Assert.assertEquals(3, empPayrollService.countEntries(EmployeePayrollService.IOService.FILE_IO));
    }
+   @Test
+   public void givenEmployeePayrollInDB_whenRetrieved_ShouldMatchEmployeeCount() throws SQLException {
+      EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+      List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollServiceData(EmployeePayrollService.IOService.DB_IO);
+      Assert.assertEquals(3,employeePayrollData.size());
+   }
+   @Test
+   public void givenNewSalaryForEmployee_WhenUpdated_ShouldSyncWithDB() throws SQLException {
+      EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+      List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollServiceData(EmployeePayrollService.IOService.DB_IO);
+      employeePayrollService.updateEmployeeSalary("vinay", 3000000.00);
+      boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("vinay");
+      System.out.println(result);
+      Assert.assertTrue(result);
+   }
+
 }
